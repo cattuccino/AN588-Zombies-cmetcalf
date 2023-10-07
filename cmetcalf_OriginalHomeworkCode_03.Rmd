@@ -33,14 +33,51 @@ First to calculate the population mean, you can use the summary function to get 
 summary(d)
 ```
 
-Then to calculate the standard deviation, we can use the sd() function just by specifying data frame and variable:
+Then to calculate the standard deviation, we can create a function using population variance:
 ```{r}
-sd(d$id)
-```
-Why does using sd() like this not work? 
+h <- d$height #first assign the variable to a value we can put into our equation
+pop_vh <- function(h) {sum((h-mean(h))^2)/(length(h))
+} #calculate the population variance
+pop_vh(h)
 
+pop_sdh <- function(h) {
+  sqrt(pop_vh(h))
+} #using the population variance we can then calculate standard deviation for the population
+pop_sdh(h)
+```
+OR a shorter way found through stackoverflow is:
 ```{r}
-sd(d$height)
+sdh <- function(h) sqrt(mean((h-mean(h))^2))
+sdh(h)
+```
+As you can see this gives the same standard deviation for the population with much shorter code.
+
+Weight:
+```{r}
+w <- d$weight
+sdw <- function(w) sqrt(mean((w-mean(w))^2)) #you could still use the sdh function created previously, but for the sake of organization in this assignment each one is given their own function assignment
+sdw(w)
+```
+
+Zombies Killed:
+```{r}
+z <- d$zombies_killed
+sdz <- function(z) sqrt(mean((z-mean(z))^2))
+sdz(z)
+```
+
+Years of Education:
+```{r}
+e <- d$years_of_education
+sde <- function(e) sqrt(mean((e-mean(e))^2))
+sde(e)
+```
+
+Age:
+```{r}
+a <- d$age
+sda <- function(a) sqrt(mean((a-mean(a))^2))
+sda(a)
 ```
 
 ## Use {ggplot} to make boxplots of each of these variables by gender.
@@ -150,6 +187,10 @@ hist(d$age, main = "Histogram of Age",
 The age plots appear to be a normal distribution, again being concentrated around the line in the qqplot and peaking around the mean in the histogram with only small variation.
 
 ## Now use the sample() function to sample ONE subset of 30 zombie survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable, and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you may need to base your estimate of the CIs on slightly different code than for the normal…
+
+```{r}
+length(d)
+```
 
 ## Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
 
