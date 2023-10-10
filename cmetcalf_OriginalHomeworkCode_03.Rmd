@@ -297,7 +297,7 @@ k <- 99  # number of samples
 n <- 30  # size of each sample
 s <- NULL  # dummy variable to hold each sample
 for (i in 1:k) {
-    s[[i]] <- d[sample(nrow(d), 50, replace = FALSE), ]
-}
+    s[[i]] <- d[sample(nrow(d), 30, replace = FALSE), ]
+    }
 head(s)
 ```
