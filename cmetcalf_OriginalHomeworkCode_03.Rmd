@@ -3,9 +3,8 @@ title: "cmetcalf_OriginalHomeworkCode_03"
 author: "Cat Metcalf"
 date: "2023-10-07"
 output: 
-    rmdformats::readthedown:
-      toc: true
-      
+  rmdformats::readthedown:
+  toc : TRUE
 ---
 
 # Some of my best friends are Zombies...
@@ -192,16 +191,13 @@ The age plots appear to be a normal distribution, again being concentrated aroun
 length(d) #denotes number of columns that we need to keep with our sample
 ```
 
-```{r}
-library(plotrix) #this allows us to use a standard error function
-```
-
 We have to take a sample from the rows (observations) of the dataframe but keep the columns (variables) with them to measure the mean:
 ```{r, first subset sample}
 set.seed(30)
-subsetsample2 <- d[sample(nrow(d), 50, replace = FALSE), ] #remember brackets denote whether you sample from [row, column]
-subsetsample2
+subsetsample2 <- d[sample(nrow(d), 30, replace = FALSE), ] #remember brackets denote whether you sample from [row, column]
+subsetsample2 
 ```
+
 Height:
 ```{r, sample 1 height calculations}
 shm <- mean(subsetsample2$height)
@@ -290,14 +286,48 @@ cia #confidence interval for age output
 
 ## Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
 
-Taken from an example in the modules but using our sampling function from above to repeat 99 times:
-```{r, 99 samples of 30}
-set.seed(99)
-k <- 99  # number of samples
-n <- 30  # size of each sample
-s <- NULL  # dummy variable to hold each sample
-for (i in 1:k) {
-    s[[i]] <- d[sample(nrow(d), 30, replace = FALSE), ]
-    }
-head(s)
+Using the replicate function we can do a sample 99 more times, which we are going to do by variable since there did not seem an easy way to calculate by variable other than telling it to take the sample from each column.
+
+```{r, replicating 99 samples}
+ssh <- replicate (99, mean(sample(d$height, size = 30, replace =FALSE))) #will replicate 99 times with samples of size 30 for height and take the means of them so that we have 99 means
+ssw <- replicate (99, mean(sample(d$weight, size = 30, replace =FALSE)))
+ssz <- replicate (99, mean(sample(d$zombies_killed, size = 30, replace =FALSE)))
+sse <- replicate (99, mean(sample(d$years_of_education, size = 30, replace =FALSE)))
+ssa <- replicate (99, mean(sample(d$age, size = 30, replace =FALSE)))
 ```
+ The output of this is going to be 99 means per variable, and added to the sample previous you would have the 100 means total.
+
+Then to get a mean and standard deviation of this sampling distribution we just take the mean of all of the means per variable.
+```{r, mean and sd of samples by variable}
+mean(ssh)
+mean(ssw)
+mean(ssz)
+mean(sse)
+mean(ssa)
+
+sd(ssh)
+sd(ssw)
+sd(ssz)
+sd(sse)
+sd(ssa)
+```
+The means appear similar to our previous calculations from question 5, but these standard deviations are smaller than the standard deviations in the previous question (with the first subset sample) and in comparison with the standard error these standard deviations are much lower than the standard errors calculated in question 5. 
+
+I will use qqplots for distributions and to see if they are normal distributions:
+
+```{r, qqplots for the variables from the sample}
+qqnorm(ssh, main = "QQ plot Sample Height Distributions") 
+qqline(ssh, col = "gray")
+qqnorm(ssw, main = "QQ plot Sample Weight Distributions") 
+qqline(ssw, col = "gray")
+qqnorm(ssz, main = "QQ plot Sample Zombies Killed Distributions") 
+qqline(ssz, col = "gray")
+qqnorm(sse, main = "QQ plot Sample Years of Education Distributions") 
+qqline(sse, col = "gray")
+qqnorm(ssa, main = "QQ plot Sample Age Distributions") 
+qqline(ssa, col = "gray")
+```
+They all seem relatively normal however there is some skewing around -1 and 1 deviations from the mean.
+
+### Challenges Faced:
+The first challenge I faced was finding a way to calculate standard deviations of each variable in an easily repeatable way, which I actually found the solution for online as mentioned above. Another challenge was standard error, since initially I did not use the correct function and in fact it was much simpler once I referenced code from the modules. Third challenge I faced was then the confidence intervals for distributions that are not normal, since I could not find an understandable way to apply the CLT technique in my code and did not completely understand it, which I still struggle to. Fourth, taking the initial subset sample was extremely difficult because the way the sample() function is set up is it automatically takes from variables unless you use the brackets to correctly sample from the rows (observations), which I eventually figured out. Finally, the last question posed an extreme challenge with repeating the sampling and then taking measurements from it. I wanted an easier way to take the means and sd of each variable for each sample in a way that made logical sense, but dissappointedly could not find it.
