@@ -1,0 +1,350 @@
+---
+title: "cmetcalf_OriginalHomeworkCode_03"
+author: "Cat Metcalf"
+date: "2023-10-07"
+output: 
+  rmdformats::readthedown:
+  toc : TRUE
+---
+
+# Some of my best friends are Zombies...
+
+```{r, echo=FALSE}
+knitr::include_graphics("Zombie picture.jpeg")
+```
+
+*All love to Pedro Pascal*
+
+```{r}
+library(curl)
+```
+First load in the document (make sure to copy raw url not just repo's):
+```{r, data}
+f <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall23/zombies.csv")
+d <- read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+head(d)
+```
+
+This data includes the first name, last name, and gender of the entire population of 1000 people who have survived the zombie apocalypse and are now ekeing out an existence somewhere on the East Coast, along with several other variables (height, weight, age, number of years of education, number of zombies they have killed, and college major).
+
+## Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education). NOTE: You will not want to use the built in var() and sd() commands as these are for samples.
+
+First to calculate the population mean, you can use the summary function to get a range of data for each variable, one of which is the mean:
+```{r, summarize data}
+summary(d)
+```
+
+
+Then to calculate the standard deviation, we can create a function using population variance:
+```{r, height SD long}
+h <- d$height #first assign the variable to a value we can put into our equation
+pop_vh <- function(h) {sum((h-mean(h))^2)/(length(h))
+} #calculate the population variance
+pop_vh(h)
+
+pop_sdh <- function(h) {
+  sqrt(pop_vh(h))
+} #using the population variance we can then calculate standard deviation for the population
+pop_sdh(h)
+```
+
+OR a shorter way found through stackoverflow is:
+```{r, height SD}
+sdh <- function(h) sqrt(mean((h-mean(h))^2))
+sdh(h)
+```
+
+As you can see this gives the same standard deviation for the population with much shorter code.
+
+Weight:
+```{r, weight SD}
+w <- d$weight
+sdw <- function(w) sqrt(mean((w-mean(w))^2)) #you could still use the sdh function created previously, but for the sake of organization in this assignment each one is given their own function assignment
+sdw(w)
+```
+
+Zombies Killed:
+```{r, zombies killed SD}
+z <- d$zombies_killed
+sdz <- function(z) sqrt(mean((z-mean(z))^2))
+sdz(z)
+```
+
+Years of Education:
+```{r, years of education SD}
+e <- d$years_of_education
+sde <- function(e) sqrt(mean((e-mean(e))^2))
+sde(e)
+```
+
+Age:
+```{r, age SD}
+a <- d$age
+sda <- function(a) sqrt(mean((a-mean(a))^2))
+sda(a)
+```
+
+## Use {ggplot} to make boxplots of each of these variables by gender.
+
+First have to load in packages with library() and then outline graphics such as what you are going "by" using filter and then what variable is being measured. You can also color the boxes using the scale_fill_manual command and even add a title. Also this solution is taken from Week 3 modules that was Jimmy's example becuase this provided a clear example as well as piping to make it one code block. 
+```{r, boxplots}
+library(ggplot2) #have to load in correct packages!
+library(dplyr)
+d %>% filter(gender == "Female" | gender == "Male" | gender == "NonBinary") %>% 
+  ggplot(aes(x = height, fill = gender)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("purple", "blue", "green")) +
+  ggtitle("Boxplot of Height by Gender") + theme_bw()
+
+d %>% filter(gender == "Female" | gender == "Male" | gender == "NonBinary") %>% 
+  ggplot(aes(x = weight, fill = gender)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("purple", "blue", "green")) +
+  ggtitle("Boxplot of Weight by Gender") + theme_bw()
+
+d %>% filter(gender == "Female" | gender == "Male" | gender == "NonBinary") %>% 
+  ggplot(aes(x = zombies_killed, fill = gender)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("purple", "blue", "green")) +
+  ggtitle("Boxplot of Zombies Killed by Gender") + theme_bw()
+
+d %>% filter(gender == "Female" | gender == "Male" | gender == "NonBinary") %>% 
+  ggplot(aes(x = years_of_education, fill = gender)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("purple", "blue", "green")) +
+  ggtitle("Boxplot of Years of Education by Gender") + theme_bw()
+
+d %>% filter(gender == "Female" | gender == "Male" | gender == "NonBinary") %>% 
+  ggplot(aes(x = age, fill = gender)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("purple", "blue", "green")) +
+  ggtitle("Boxplot of Age by Gender") + theme_bw()
+```
+
+
+## Use {ggplot} to make scatterplots of height and weight in relation to age. Do these variables seem to be related? In what way?
+
+We would use a bivariate scatterplot here:
+```{r, height and age plot}
+p <- ggplot(data = d, aes(x = age, y = height))
+p <- p + geom_point()
+p <- p + geom_smooth(method = "lm")
+p
+```
+
+Now for weight:
+```{r, weight and age plot}
+p <- ggplot(data = d, aes(x = age, y = weight))
+p <- p + geom_point()
+p <- p + geom_smooth(method = "lm")
+p
+```
+
+
+They do seem to be related in that the majority is around 20 years of age for both variables and concentrate around a positive sloped line of best fit. Therefore, both height and weight increase with age but the weight plot does appear to have more spread.
+
+## Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not (hint: not all are drawn from the normal distribution)? For those that are not normal, can you determine from which common distribution they are drawn?
+
+```{r, height qq}
+qqnorm(d$height, main = "Normal QQ plot Height") 
+qqline(d$height, col = "gray") 
+```
+```{r, height hist}
+hist(d$height, main = "Histogram of Height",
+     xlab = "Height")
+```
+Points of the QQ plot lie pretty evenly on the line and the histogram shows equal distribution with it peaking around the mean, so these appear normal.
+
+```{r, weight plots}
+qqnorm(d$weight, main = "Normal QQ plot Weight") 
+qqline(d$weight, col = "gray") 
+
+hist(d$weight, main = "Histogram of Weight",
+     xlab = "Weight")
+```
+Weight does the same as height with centering along the line and concentrating amongst the mean, so also a relatively normal distribution.
+
+```{r, zombies killed plots}
+qqnorm(d$zombies_killed, main = "Normal QQ plot Zombies Killed") 
+qqline(d$zombies_killed, col = "gray") 
+
+hist(d$zombies_killed, main = "Histogram of Zombies Killed",
+     xlab = "Zombies Killed")
+```
+This qqplot and histogram appear not normal, with the histogram being skewed left (lower tail) and the qqplot not falling evenly on the line at all. It likely belongs to an exponential distribution based on the ggplot rapidly increasing along a curved line rather than the straight line indicated.
+
+```{r, years education plots}
+qqnorm(d$years_of_education, main = "Normal QQ plot Years of Education") 
+qqline(d$years_of_education, col = "gray") 
+
+hist(d$years_of_education, main = "Histogram of Years of Education",
+     xlab = "Years of Education")
+```
+Similar to the zombies killed plot, this also is not a normal distribution. The histogram is skewed towards the lower tail and the qqplot is in platforms instead of falling along the line. Again this is likely an exponential distribution, with similar reasoning stated uner zombies killed.
+
+```{r, age plots}
+qqnorm(d$age, main = "Normal QQ plot Age") 
+qqline(d$age, col = "gray") 
+
+hist(d$age, main = "Histogram of Age",
+     xlab = "Age")
+```
+The age plots appear to be a normal distribution, again being concentrated around the line in the qqplot and peaking around the mean in the histogram with only small variation.
+
+## Now use the sample() function to sample ONE subset of 30 zombie survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable, and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you may need to base your estimate of the CIs on slightly different code than for the normal…
+
+```{r, length}
+length(d) #denotes number of columns that we need to keep with our sample
+```
+
+We have to take a sample from the rows (observations) of the dataframe but keep the columns (variables) with them to measure the mean:
+```{r, first subset sample}
+set.seed(30)
+subsetsample2 <- d[sample(nrow(d), 30, replace = FALSE), ] #remember brackets denote whether you sample from [row, column]
+subsetsample2 
+```
+
+Height:
+```{r, sample 1 height calculations}
+shm <- mean(subsetsample2$height)
+shd <- sd(subsetsample2$height)
+she <- sd(subsetsample2$height)/sqrt(length(subsetsample2$height)) #standard error equation
+shm #outputs mean of height variable for sample hence ("s", "h", "m")
+shd
+she
+```
+Then we can construct a confidence interval (using an example from module):
+```{r, height confidence interval}
+lower <- shm - qnorm(1 - 0.05/2) * she  # (1-alpha)/2 each in the upper and lower tails of the distribution
+upper <- shm + qnorm(1 - 0.05/2) * she  # (1-alpha)/2 each in the upper and lower tails of the distribution
+cih <- c(lower, upper)
+cih #confidence interval for height output
+```
+
+Weight:
+```{r, sample 1 weight calculations}
+swm <- mean(subsetsample2$weight)
+swd <- sd(subsetsample2$weight)
+swe <- sd(subsetsample2$weight)/sqrt(length(subsetsample2$weight))
+swm
+swd
+swe
+```
+
+```{r, weight confidence interval}
+lower <- swm - qnorm(1 - 0.05/2) * swe  # (1-alpha)/2 each in the upper and lower tails of the distribution
+upper <- swm + qnorm(1 - 0.05/2) * swe  # (1-alpha)/2 each in the upper and lower tails of the distribution
+ciw <- c(lower, upper)
+ciw #confidence interval for weight output
+```
+
+Zombies Killed (not normal distribution):
+```{r, sample 1 zombies killed calculations}
+szm <- mean(subsetsample2$zombies_killed)
+szd <- sd(subsetsample2$zombies_killed)
+sze <- sd(subsetsample2$zombies_killed)/sqrt(length(subsetsample2$zombies_killed))
+szm
+szd
+sze
+```
+
+```{r, zombies killed confidence interval}
+lower <- szm - qnorm(1 - 0.05/2) * sze  # (1-alpha)/2 each in the upper and lower tails of the distribution
+upper <- szm + qnorm(1 - 0.05/2) * sze  # (1-alpha)/2 each in the upper and lower tails of the distribution
+ciz <- c(lower, upper)
+ciz #confidence interval for zombies killed output
+```
+*struggled to find way to calculate a CI for a non-normal distribution, struggled with using the CLT, any tips? May be a Poisson distribution so as my peer commentor Sam recommended, we could use the poisson.test() function:
+```{r}
+poisson.test(length(subsetsample2$zombies_killed), conf.level = 0.95)
+```
+
+
+Years of Education (not normal distribution):
+```{r, sample 1 years of education calculations}
+sem <- mean(subsetsample2$years_of_education)
+sed <- sd(subsetsample2$years_of_education)
+see <- sd(subsetsample2$years_of_education)/sqrt(length(subsetsample2$years_of_education))
+sem
+sed
+see
+```
+
+```{r, years of education confidence interval}
+lower <- sem - qnorm(1 - 0.05/2) * see  # (1-alpha)/2 each in the upper and lower tails of the distribution
+upper <- sem + qnorm(1 - 0.05/2) * see  # (1-alpha)/2 each in the upper and lower tails of the distribution
+cie <- c(lower, upper)
+cie #confidence interval for years of education output
+```
+
+Assuming it may be a poisson distribution like zombies killed:
+```{r}
+poisson.test(length(subsetsample2$years_of_education), conf.level = 0.95)
+```
+Issue with this is it gives the same as above, so this may not be the solution we are looking for. But I will leave it as one possible way to calculate a CI for a non-normal distribution.
+
+Age:
+```{r, sample 1 age calculations}
+sam <- mean(subsetsample2$age)
+sad <- sd(subsetsample2$age)
+sae <- sd(subsetsample2$age)/sqrt(length(subsetsample2$age))
+sam
+sad
+sae
+```
+
+```{r, age confidence interval}
+lower <- sam - qnorm(1 - 0.05/2) * sae  # (1-alpha)/2 each in the upper and lower tails of the distribution
+upper <- sam + qnorm(1 - 0.05/2) * sae  # (1-alpha)/2 each in the upper and lower tails of the distribution
+cia <- c(lower, upper)
+cia #confidence interval for age output
+```
+
+## Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
+
+Using the replicate function we can do a sample 99 more times, which we are going to do by variable since there did not seem an easy way to calculate by variable other than telling it to take the sample from each column.
+
+```{r, replicating 99 samples}
+ssh <- replicate (99, mean(sample(d$height, size = 30, replace =FALSE))) #will replicate 99 times with samples of size 30 for height and take the means of them so that we have 99 means
+ssw <- replicate (99, mean(sample(d$weight, size = 30, replace =FALSE)))
+ssz <- replicate (99, mean(sample(d$zombies_killed, size = 30, replace =FALSE)))
+sse <- replicate (99, mean(sample(d$years_of_education, size = 30, replace =FALSE)))
+ssa <- replicate (99, mean(sample(d$age, size = 30, replace =FALSE)))
+```
+ The output of this is going to be 99 means per variable, and added to the sample previous you would have the 100 means total.
+
+Then to get a mean and standard deviation of this sampling distribution we just take the mean of all of the means per variable.
+```{r, mean and sd of samples by variable}
+mean(ssh)
+mean(ssw)
+mean(ssz)
+mean(sse)
+mean(ssa)
+
+sd(ssh)
+sd(ssw)
+sd(ssz)
+sd(sse)
+sd(ssa)
+```
+The means appear similar to our previous calculations from question 5, but these standard deviations are smaller than the standard deviations in the previous question (with the first subset sample) and in comparison with the standard error these standard deviations are much lower than the standard errors calculated in question 5. 
+
+I will use qqplots for distributions and to see if they are normal distributions:
+
+```{r, qqplots for the variables from the sample}
+qqnorm(ssh, main = "QQ plot Sample Height Distributions") 
+qqline(ssh, col = "gray")
+qqnorm(ssw, main = "QQ plot Sample Weight Distributions") 
+qqline(ssw, col = "gray")
+qqnorm(ssz, main = "QQ plot Sample Zombies Killed Distributions") 
+qqline(ssz, col = "gray")
+qqnorm(sse, main = "QQ plot Sample Years of Education Distributions") 
+qqline(sse, col = "gray")
+qqnorm(ssa, main = "QQ plot Sample Age Distributions") 
+qqline(ssa, col = "gray")
+```
+
+They all seem relatively normal however there is some skewing around -1 and 1 deviations from the mean.
+
+### Challenges Faced:
+The first challenge I faced was finding a way to calculate standard deviations of each variable in an easily repeatable way, which I actually found the solution for online as mentioned above. Another challenge was standard error, since initially I did not use the correct function and in fact it was much simpler once I referenced code from the modules. Third challenge I faced was then the confidence intervals for distributions that are not normal, since I could not find an understandable way to apply the CLT technique in my code and did not completely understand it, which I still struggle to. Fourth, taking the initial subset sample was extremely difficult because the way the sample() function is set up is it automatically takes from variables unless you use the brackets to correctly sample from the rows (observations), which I eventually figured out. Finally, the last question posed an extreme challenge with repeating the sampling and then taking measurements from it. I wanted an easier way to take the means and sd of each variable for each sample in a way that made logical sense, but dissappointedly could not find it.
